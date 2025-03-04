@@ -4,29 +4,45 @@
 
 package frc.robot;
 
+import com.revrobotics.spark.SparkMax;
+
 import edu.wpi.first.wpilibj.TimedRobot;
+import edu.wpi.first.wpilibj.drive.DifferentialDrive;
 import edu.wpi.first.wpilibj.smartdashboard.SendableChooser;
 import edu.wpi.first.wpilibj.smartdashboard.SmartDashboard;
+import edu.wpi.first.wpilibj.XboxController;
 
 /**
- * The methods in this class are called automatically corresponding to each mode, as described in
- * the TimedRobot documentation. If you change the name of this class or the package after creating
- * this project, you must also update the Main.java file in the project.
+ * The VM is configured to automatically run this class, and to call the functions corresponding to
+ * each mode, as described in the TimedRobot documentation. If you change the name of this class or
+ * the package after creating this project, you must also update the build.gradle file in the
+ * project.
  */
 public class Robot extends TimedRobot {
   private static final String kDefaultAuto = "Default";
   private static final String kCustomAuto = "My Auto";
   private String m_autoSelected;
   private final SendableChooser<String> m_chooser = new SendableChooser<>();
+  private final SparkMax frontLeftMotor = new SparkMax(1, SparkMax.MotorType.kBrushless);
+  private final SparkMax frontRightMotor = new SparkMax(2, SparkMax.MotorType.kBrushless);
+  private final SparkMax backLeftMotor = new SparkMax(3, SparkMax.MotorType.kBrushless);
+  private final SparkMax backRightMotor = new SparkMax(4, SparkMax.MotorType.kBrushless);
+  private final XboxController controller = new XboxController(0);
+  private DifferentialDrive myDrive;
 
   /**
    * This function is run when the robot is first started up and should be used for any
    * initialization code.
    */
-  public Robot() {
+  @Override
+  public void robotInit() {
     m_chooser.setDefaultOption("Default Auto", kDefaultAuto);
     m_chooser.addOption("My Auto", kCustomAuto);
     SmartDashboard.putData("Auto choices", m_chooser);
+    myDrive = new DifferentialDrive(frontLeftMotor,  frontRightMotor);
+    backLeftMotor.isFollower();
+    backRightMotor.isFollower();
+
   }
 
   /**
@@ -76,7 +92,9 @@ public class Robot extends TimedRobot {
 
   /** This function is called periodically during operator control. */
   @Override
-  public void teleopPeriodic() {}
+  public void teleopPeriodic() {
+    myDrive.curvatureDrive(-controller.getLeftY(), -controller.getRightX(), controller.getRightBumper());
+  }
 
   /** This function is called once when the robot is disabled. */
   @Override
